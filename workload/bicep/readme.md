@@ -26,32 +26,13 @@ az deployment create \
   --deployAlaWorkspace=true \
   --location "eastus"
 ```
-
 ### PowerShell
 
 ```powershell
-$avdVmLocalUserPassword = Read-Host -Prompt "Local user password" -AsSecureString
-$avdDomainJoinUserPassword = Read-Host -Prompt "Domain join password" -AsSecureString
-New-AzSubscriptionDeployment `
-  -TemplateFile workload/bicep/deploy-baseline.bicep `
-  -TemplateParameterFile workload/bicep/parameters/deploy-baseline-parameters-example.json `
-  -avdWorkloadSubsId "<subscriptionId>" `
-  -deploymentPrefix "<deploymentPrefix>" `
-  -avdVmLocalUserName "<localUserName>" `
-  -avdVmLocalUserPassword $avdVmLocalUserPassword `
-  -avdIdentityServiceProvider "<IdentityServiceProvider>" `
-  -avdIdentityDomainName "<domainJoinUserName>" `
-  -avdDomainJoinUserName "<domainJoinUserName>"  `
-  -avdDomainJoinUserPassword $avdDomainJoinUserPassword `
-  -existingHubVnetResourceId "<hubVnetResourceId>"  `
-  -customDnsIps "<customDNSservers>"  `
-  -avdEnterpriseAppObjectId "<wvdAppObjectId>" `
-  -avdVnetPrivateDnsZone $true `
-  -avdVnetPrivateDnsZoneFilesId "<PrivateDnsZoneFilesId>" `
-  -avdVnetPrivateDnsZoneKeyvaultId "<PrivateDnsZoneKeyvaultId>" `
-  -avdDeployMonitoring $true `
-  -deployAlaWorkspace $true `
-  -Location "eastus"
+New-AzResourceGroupDeployment  `
+   -TemplateFile infra-as-code/zone-1.bicep `
+   -avdSubscriptionID "a7693725-2adf-4eff-98eb-fc941246426d" `
+   -location "norwayeast"
 ```
 
 ## Optional: Custom Image Build deployment

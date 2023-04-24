@@ -7,8 +7,8 @@ param createAvdVnet bool = true
 // ======== //
 //  Params  //
 // ======== //
-@description('AVD Subscription ID (Default: 00000000000000000)')
-param avdSubscriptionID string = '00000000000000000'
+@description('AVD Subscription ID (Default: XXXX-XXXXX-XXXXXXX-XXXX)')
+param avdSubscriptionID string = 'a7693725-2adf-4eff-98eb-fc941246426d'
 @description('Location where to deploy AVD management plane. (Default: eastus2)')
 param avdHostPoolMetadataLocation string = 'eastus2'
 @description('Location where to deploy Host Pool/VM Services. (Default: eastus2)')
@@ -35,23 +35,23 @@ param avdSessionLimit int = 1
 // ====================== //
 @maxLength(90)
 @description('AVD service resources resource group custom name. (Default: rg-avd-use2-app1-service-objects)')
-param avdServiceObjectsRgCustomName string = 'rg-avd-use2-app1-service-objects'
+param avdServiceObjectsRg string = 'rg-avd-use2-app1-service-objects'
 
 @maxLength(90)
 @description('AVD network resources resource group custom name. (Default: rg-avd-use2-app1-network)')
-param avdNetworkObjectsRgCustomName string = 'rg-avd-use2-app1-network'
+param avdNetworkObjectsRg string = 'rg-avd-use2-app1-network'
 
 @maxLength(90)
 @description('AVD network resources resource group custom name. (Default: rg-avd-use2-app1-pool-compute)')
-param avdComputeObjectsRgCustomName string = 'rg-avd-use2-app1-pool-compute'
+param avdComputeObjectsRg string = 'rg-avd-use2-app1-pool-compute'
 
 @maxLength(90)
 @description('AVD network resources resource group custom name. (Default: rg-avd-use2-app1-storage)')
-param avdStorageObjectsRgCustomName string = 'rg-avd-use2-app1-storage'
+param avdStorageObjectsRg string = 'rg-avd-use2-app1-storage'
 
 @maxLength(90)
 @description('AVD monitoring resource group custom name. (Default: rg-avd-use2-app1-monitoring)')
-param avdMonitoringRgCustomName string = 'rg-avd-use2-app1-monitoring'
+param avdMonitoringRg string = 'rg-avd-use2-app1-monitoring'
 
 // ================ //
 // Network Params  //
@@ -82,27 +82,27 @@ var varResourceGroups = [
 //Exclude NetworkingRG incase end user already has
   {
       purpose: 'Service-Objects'
-      name: avdServiceObjectsRgCustomName
+      name: avdServiceObjectsRg
       location: avdHostPoolMetadataLocation
       enableDefaultTelemetry: false
   }
   {
       purpose: 'Pool-Compute'
-      name: avdComputeObjectsRgCustomName
+      name: avdComputeObjectsRg
       location: avdHostPoolMetadataLocation
       enableDefaultTelemetry: false
       
   }
   {
     purpose: 'Storage'
-    name: avdStorageObjectsRgCustomName
+    name: avdStorageObjectsRg
     location: avdHostPoolMetadataLocation
     enableDefaultTelemetry: false
     
   }
   {
     purpose: 'Monitoring'
-    name: avdMonitoringRgCustomName
+    name: avdMonitoringRg
     location: avdHostPoolMetadataLocation
     enableDefaultTelemetry: false
     
@@ -172,19 +172,20 @@ param time string = utcNow()
 // Resource Groups
 module baselineResourceGroups '../carml/0.10.0/modules/Microsoft.Resources/resourceGroups/deploy.bicep' = [for resourceGroup in varResourceGroups: {
   scope: subscription(avdSubscriptionID)
-  name: 'Deploy-AVD-${resourceGroup.purpose}-${time}'
+  name: 'ResourceGroups-${time}'
+  
   params: {
-      name: resourceGroup.name
-      location: resourceGroup.location
-      enableDefaultTelemetry: resourceGroup.enableDefaultTelemetry
-      tags: resourceGroup.tags
+    // Required parameters
+    name: resourceGroup
+    location: avdSessionHostLocation
   }
 }]
+
 module baselineNetworkResourceGroup '../carml/0.10.0/modules/Microsoft.Resources/resourceGroups/deploy.bicep' = if (createAvdVnet) {
   scope: subscription(avdSubscriptionID)
-  name: 'Deploy-${avdNetworkObjectsRgCustomName}-${time}'
+  name: 'Deploy-${avdNetworkObjectsRg}-${time}'
   params: {
-      name: avdNetworkObjectsRgCustomName
+      name: avdNetworkObjectsRg
       location: avdSessionHostLocation
       enableDefaultTelemetry: false
   }

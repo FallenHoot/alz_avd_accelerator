@@ -22,7 +22,7 @@ env:
 
 jobs:
 
-  AVD_Bicep_Resource_Groups:
+  AVD_Bicep_HostPool:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -35,14 +35,14 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           allow-no-subscriptions: true
 
-      - name: Create Resource Groups & Prerequisites
+      - name: Create HostPool
         id: create_zone-0
         uses: azure/arm-deploy@v1
         with:
           scope: subscription
           subscriptionId: ${{ env.AVDSubId }}
           region: ${{ env.Location }}
-          template: infra-as-code/zone-0.bicep
-          parameters: infra-as-code/parameters/zone-0.parameters.all.json
-          deploymentName: create_zone-0-${{ env.runNumber }}
+          template: infra-as-code/zone-1.bicep
+          parameters: infra-as-code/parameters/zone-1.parameters.all.json
+          deploymentName: create_zone-1-${{ env.runNumber }}
           failOnStdErr: false

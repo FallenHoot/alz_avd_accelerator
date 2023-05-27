@@ -255,6 +255,3 @@ output tokenExpirationTime string = dateTimeAdd(baseTime, tokenValidityLength)
 
 @sys.description('The location the resource was deployed into.')
 output location string = hostPool.location
-
-@sys.description('The location the resource was deployed into.')
-output avdHostPoolToken string = hostPool.properties.registrationInfo.token

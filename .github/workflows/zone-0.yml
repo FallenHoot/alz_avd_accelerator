@@ -31,7 +31,9 @@ jobs:
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       AZURE_SUBSCRIPTION_ID: AVDSubId
+
   AVD_Bicep_HostPool:
     runs-on: ubuntu-latest
     steps:
@@ -42,10 +44,8 @@ jobs:
       - name: OIDC Login to Tenant
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ env.AVDSubId }}
-          enable-AzPSSession: true
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          allow-no-subscriptions: true
 
       - name: create zone-0
         id: create_zone-0

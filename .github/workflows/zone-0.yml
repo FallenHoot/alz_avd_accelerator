@@ -1,4 +1,4 @@
-name: ALZ AVD Accelerator Zone-1 Pipeline
+name: ALZ AVD Accelerator Zone-0 Pipeline
 
 on:
   push:

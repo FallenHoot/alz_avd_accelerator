@@ -117,6 +117,140 @@ module basicResourceGroups '../carml/0.10.0/modules/Microsoft.Resources/resource
  }
 
 //Networking
+module networkSecurityGroupAVD '../carml/0.10.0/modules/Microsoft.Network/networkSecurityGroups/deploy.bicep' = {
+  scope: resourceGroup(avdNetworkObjectsRg)
+  name: '${uniqueString(deployment().name)}-Networking-NSG'
+  params: {
+    // Required parameters
+    name: avdNetworksecurityGroup
+    lock: 'CanNotDelete'
+    location: avdSessionHostLocation
+    securityRules: [
+      {
+          name: 'AVDServiceTraffic'
+          properties: {
+              priority: 100
+              access: 'Allow'
+              description: 'Session host traffic to AVD control plane'
+              destinationAddressPrefix: 'WindowsVirtualDesktop'
+              direction: 'Outbound'
+              sourcePortRange: '*'
+              destinationPortRange: '443'
+              protocol: 'Tcp'
+              sourceAddressPrefix: 'VirtualNetwork'
+          }
+      }
+      {
+          name: 'AzureCloud'
+          properties: {
+              priority: 110
+              access: 'Allow'
+              description: 'Session host traffic to Azure cloud services'
+              destinationAddressPrefix: 'AzureCloud'
+              direction: 'Outbound'
+              sourcePortRange: '*'
+              destinationPortRange: '8443'
+              protocol: 'Tcp'
+              sourceAddressPrefix: 'VirtualNetwork'
+          }
+      }
+      {
+          name: 'AzureMonitor'
+          properties: {
+              priority: 120
+              access: 'Allow'
+              description: 'Session host traffic to Azure Monitor'
+              destinationAddressPrefix: 'AzureMonitor'
+              direction: 'Outbound'
+              sourcePortRange: '*'
+              destinationPortRange: '443'
+              protocol: 'Tcp'
+              sourceAddressPrefix: 'VirtualNetwork'
+          }
+      }
+      {
+          name: 'AzureMarketPlace'
+          properties: {
+              priority: 130
+              access: 'Allow'
+              description: 'Session host traffic to Azure Monitor'
+              destinationAddressPrefix: 'AzureFrontDoor.Frontend'
+              direction: 'Outbound'
+              sourcePortRange: '*'
+              destinationPortRange: '443'
+              protocol: 'Tcp'
+              sourceAddressPrefix: 'VirtualNetwork'
+          }
+      }
+      {
+          name: 'WindowsActivationKMS'
+          properties: {
+              priority: 140
+              access: 'Allow'
+              description: 'Session host traffic to Windows license activation services'
+              destinationAddressPrefix: '23.102.135.246'
+              direction: 'Outbound'
+              sourcePortRange: '*'
+              destinationPortRange: '1688'
+              protocol: 'Tcp'
+              sourceAddressPrefix: 'VirtualNetwork'
+          }
+      }
+      {
+          name: 'AzureInstanceMetadata'
+          properties: {
+              priority: 150
+              access: 'Allow'
+              description: 'Session host traffic to Azure instance metadata'
+              destinationAddressPrefix: '169.254.169.254'
+              direction: 'Outbound'
+              sourcePortRange: '*'
+              destinationPortRange: '80'
+              protocol: 'Tcp'
+              sourceAddressPrefix: 'VirtualNetwork'
+          }
+      }
+      {
+          name: 'RDPShortpath'
+          properties: {
+              priority: 150
+              access: 'Allow'
+              description: 'Session host traffic to Azure instance metadata'
+              destinationAddressPrefix: 'VirtualNetwork'
+              direction: 'Inbound'
+              sourcePortRange: '*'
+              destinationPortRange: '3390'
+              protocol: 'Udp'
+              sourceAddressPrefix: 'VirtualNetwork'
+          }
+      }
+  ]
+  enableDefaultTelemetry: false
+  }
+}
+
+module routeTableAvd '../carml/0.10.0/modules/Microsoft.Network/routeTables/deploy.bicep' = {
+  scope: resourceGroup(avdNetworkObjectsRg)
+  name: '${uniqueString(deployment().name)}-Networking-RT'
+  params: {
+    // Required parameters
+    name: avdRouteTable
+    lock: 'CanNotDelete'
+    location: avdSessionHostLocation
+    routes: [
+      {
+        name: 'AVDServiceTraffic'
+        properties: {
+          addressPrefix: 'WindowsVirtualDesktop'
+          hasBgpOverride: true
+          nextHopType: 'Internet'
+        }
+      }
+    ]
+    enableDefaultTelemetry: false
+  }
+}
+
 module virtualNetworks '../carml/0.10.0/modules/Microsoft.Network/virtualNetworks/deploy.bicep' =  if (createAvdVnet) {
   scope: resourceGroup(avdNetworkObjectsRg)
   name: '${uniqueString(deployment().name)}-Networking'
@@ -127,14 +261,13 @@ module virtualNetworks '../carml/0.10.0/modules/Microsoft.Network/virtualNetwork
     ]
     name: avdVnetworkName
     location: avdSessionHostLocation
-    // Non-required parameters
     lock: 'CanNotDelete'
     subnets: [
       {
         addressPrefix: vNetworkAvdSubnetAddressPrefix
         name: avdVnetworkSubnetName
-        networkSecurityGroupId: avdNetworksecurityGroup
-        routeTableId: avdRouteTable
+        networkSecurityGroupId: networkSecurityGroupAVD.outputs.resourceId
+        routeTableId: routeTableAvd.outputs.resourceId
     
       }
     ]

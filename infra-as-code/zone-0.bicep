@@ -1,23 +1,23 @@
+targetScope = 'subscription'
 // ======== //
 // Boolens //
 // ======== //
 @description('Optional. Create new virtual network. (Default: true)')
 param createAvdVnet bool = true
 
-// ======== //
-//  Params  //
-// ======== //
+// ============ //
+//  AVD Params  //
+// =========== //
 @description('AVD Subscription ID (Default: XXXX-XXXXX-XXXXXXX-XXXX)')
 param avdSubscriptionID string = 'a7693725-2adf-4eff-98eb-fc941246426d'
 @description('Location where to deploy AVD management plane. (Default: eastus2)')
-param avdHostPoolMetadataLocation string = 'eastus2'
+param avdHostPoolMetadataLocation string = 'westeurope'
 @description('Location where to deploy Host Pool/VM Services. (Default: eastus2)')
-param avdSessionHostLocation string = 'eastus2'
+param avdSessionHostLocation string = 'norwayeast'
 @description('Required. AVD Host Pool Type. Pooled or Personal ID, multiple subscriptions scenario. (Default: Pooled )')
 param avdHostPoolType string = 'Pooled'
 @description('Required. Breadth-first load balancing distributes new user sessions across all available session hosts in the host pool. Depth-first load balancing distributes new user sessions to an available session host with the highest number of connections but has not reached its maximum session limit threshold. (Default: Breadth-first )')
-param avdLoadBalancingAlgorithm string = 'Breadth-first'
-
+param avdLoadBalancingAlgorithm string = 'BreadthFirst'
 @description('Required. Automatic assignment – The service will select an available host and assign it to an user. Direct assignment – Admin selects a specific host to assign to an user. (Default: Automatic )')
 param avdAssignmentType string = 'Automatic'
 @description('Required. HostPool Name. (Default: alzavdaccelerator )')
@@ -36,19 +36,15 @@ param avdSessionLimit int = 1
 @maxLength(90)
 @description('AVD service resources resource group custom name. (Default: rg-avd-use2-app1-service-objects)')
 param avdServiceObjectsRg string = 'rg-avd-use2-app1-service-objects'
-
 @maxLength(90)
 @description('AVD network resources resource group custom name. (Default: rg-avd-use2-app1-network)')
 param avdNetworkObjectsRg string = 'rg-avd-use2-app1-network'
-
 @maxLength(90)
 @description('AVD network resources resource group custom name. (Default: rg-avd-use2-app1-pool-compute)')
 param avdComputeObjectsRg string = 'rg-avd-use2-app1-pool-compute'
-
 @maxLength(90)
 @description('AVD network resources resource group custom name. (Default: rg-avd-use2-app1-storage)')
 param avdStorageObjectsRg string = 'rg-avd-use2-app1-storage'
-
 @maxLength(90)
 @description('AVD monitoring resource group custom name. (Default: rg-avd-use2-app1-monitoring)')
 param avdMonitoringRg string = 'rg-avd-use2-app1-monitoring'
@@ -78,36 +74,36 @@ param avdRouteTable string = 'route-avd-use2-app1-001'
 // ================== //
 // DO NOT EDIT BELOW //
 // ================= //
-var varResourceGroups = [
+var ResourceGroups  = {
 //Exclude NetworkingRG incase end user already has
-  {
+  rg1: {
       purpose: 'Service-Objects'
       name: avdServiceObjectsRg
       location: avdHostPoolMetadataLocation
       enableDefaultTelemetry: false
   }
-  {
+  rg2: {
       purpose: 'Pool-Compute'
       name: avdComputeObjectsRg
       location: avdHostPoolMetadataLocation
       enableDefaultTelemetry: false
       
   }
-  {
+  rg3: {
     purpose: 'Storage'
     name: avdStorageObjectsRg
     location: avdHostPoolMetadataLocation
     enableDefaultTelemetry: false
     
   }
-  {
+  rg4: {
     purpose: 'Monitoring'
     name: avdMonitoringRg
     location: avdHostPoolMetadataLocation
     enableDefaultTelemetry: false
     
   }
-]
+}
 
 var varTimeZones = {
   australiacentral: 'AUS Eastern Standard Time'
@@ -167,33 +163,37 @@ var varTimeZones = {
   westus3: 'Mountain Standard Time'
 }
 @description('Do not modify, used to set unique value for resource deployment.')
-param time string = utcNow()
+
+// ======== //
+// Modules //
+// ======= //
 
 // Resource Groups
-module baselineResourceGroups '../carml/0.10.0/modules/Microsoft.Resources/resourceGroups/deploy.bicep' = [for resourceGroup in varResourceGroups: {
+module basicResourceGroups '../carml/0.10.0/modules/Microsoft.Resources/resourceGroups/deploy.bicep' = [for rg in items(ResourceGroups): {
   scope: subscription(avdSubscriptionID)
-  name: 'ResourceGroups-${time}'
-  
+  name: '${uniqueString(deployment().name)}-${rg.value.name}'
   params: {
     // Required parameters
-    name: resourceGroup
-    location: avdSessionHostLocation
+    name: rg.value.name
+    location: rg.value.location
+    enableDefaultTelemetry: false
   }
 }]
 
-module baselineNetworkResourceGroup '../carml/0.10.0/modules/Microsoft.Resources/resourceGroups/deploy.bicep' = if (createAvdVnet) {
-  scope: subscription(avdSubscriptionID)
-  name: 'Deploy-${avdNetworkObjectsRg}-${time}'
-  params: {
-      name: avdNetworkObjectsRg
-      location: avdSessionHostLocation
-      enableDefaultTelemetry: false
-  }
-}
+ module baselineNetworkResourceGroup '../carml/0.10.0/modules/Microsoft.Resources/resourceGroups/deploy.bicep' = if (createAvdVnet) {
+   scope: subscription(avdSubscriptionID)
+   name: '${uniqueString(deployment().name)}-${avdNetworkObjectsRg}'
+   params: {
+       name: avdNetworkObjectsRg
+       location: avdSessionHostLocation
+       enableDefaultTelemetry: false
+   }
+ }
 
-// Networking
+//Networking
 module virtualNetworks '../carml/0.10.0/modules/Microsoft.Network/virtualNetworks/deploy.bicep' =  if (createAvdVnet) {
-  name: 'Networking-${time}'
+  scope: resourceGroup(avdNetworkObjectsRg)
+  name: '${uniqueString(deployment().name)}-Networking'
   params: {
     // Required parameters
     addressPrefixes: [
@@ -214,38 +214,22 @@ module virtualNetworks '../carml/0.10.0/modules/Microsoft.Network/virtualNetwork
     ]
   }
 }
-
-// AVD Host Pool
-module hostpools '../carml/0.10.0/modules//Microsoft.DesktopVirtualization/hostpools/deploy.bicep' = {
-  name: 'HostPool-${time}'
+// Hostpool w/o session host
+module hostpools '../carml/0.10.0/modules/Microsoft.DesktopVirtualization/hostpools/deploy.bicep' = {
+  scope: resourceGroup(avdServiceObjectsRg)
+  name: '${uniqueString(deployment().name)}-HostPool'
   params: {
     // Required parameters
     name: avdHostPoolName
     preferredAppGroupType: avdPreferredAppGroupType
-    // Non-required parameters
-    agentUpdate: {
-      maintenanceWindows: [
-        {
-          dayOfWeek: 'Friday'
-          hour: 7
-        }
-        {
-          dayOfWeek: 'Saturday'
-          hour: 8
-        }
-      ]
-      maintenanceWindowTimeZone: varTimeZones[avdSessionHostLocation]
-      type: 'Scheduled'
-      useSessionHostLocalTime: false
-    }
     customRdpProperty: 'audiocapturemode:i:1;audiomode:i:0;drivestoredirect:s:;redirectclipboard:i:1;redirectcomports:i:1;redirectprinters:i:1;redirectsmartcards:i:1;screen mode id:i:2;'
     description: 'ALZ AVD POC'
     friendlyName: 'AVDv2'
+    type: avdHostPoolType
     loadBalancerType: avdLoadBalancingAlgorithm
     location: avdHostPoolMetadataLocation
     lock: 'CanNotDelete'
     maxSessionLimit: avdSessionLimit
     personalDesktopAssignmentType: avdHostPoolType == 'Personal' ? '': avdAssignmentType
-    type: avdHostPoolType
   }
 }

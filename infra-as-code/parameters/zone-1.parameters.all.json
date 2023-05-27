@@ -1,0 +1,9 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "avdServiceObjectsRg": {
+        "value": "rg-avd-use2-app1-service-objects"
+      }
+    }
+  }

@@ -7,6 +7,11 @@ on:
     paths:
       - 'infra-as-code/zone-0.bicep'
       - 'carml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
 
 env:
   Location: "norwayeast"
@@ -16,17 +21,32 @@ env:
   runNumber: ${{ github.run_number }}
 
 jobs:
-  bicep_tenant_deploy:
+  CostEstimate:
+    uses: TheCloudTheory/arm-estimator/.github/workflows/estimateFromUrl.yml@main
+    with:
+      rg: 'MyResourceGroup'
+      environment: '' #Use empty string for repo level secrets
+      templateFileURL: infra-as-code/zone-0..bicep
+      templateParamFileURL: infra-as-code/parameters/zone-0.parameters.all.json
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: AVDSubId
+  AVD_Bicep_HostPool:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Azure Login
+      - name: OIDC Login to Tenant
         uses: azure/login@v1
         with:
-          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AVDSubId }}
+          enable-AzPSSession: true
+
       - name: create zone-0
         id: create_zone-0
         uses: azure/arm-deploy@v1

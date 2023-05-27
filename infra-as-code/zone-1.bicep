@@ -66,4 +66,3 @@ module hostpools '../carml/0.10.0/modules/Microsoft.DesktopVirtualization/hostpo
     }
   }
 }
-output avdHostPoolToken string = hostpools.outputs.avdHostPoolToken

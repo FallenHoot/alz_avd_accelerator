@@ -21,18 +21,6 @@ env:
   runNumber: ${{ github.run_number }}
 
 jobs:
-  CostEstimate:
-    uses: TheCloudTheory/arm-estimator/.github/workflows/estimateFromUrl.yml@main
-    with:
-      rg: 'MyResourceGroup'
-      environment: '' #Use empty string for repo level secrets
-      templateFileURL: infra-as-code/zone-0..bicep
-      templateParamFileURL: infra-as-code/parameters/zone-0.parameters.all.json
-    secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_SUBSCRIPTION_ID: AVDSubId
 
   AVD_Bicep_HostPool:
     runs-on: ubuntu-latest

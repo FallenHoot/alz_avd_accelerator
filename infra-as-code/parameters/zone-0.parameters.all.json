@@ -14,24 +14,6 @@
     "avdSessionHostLocation": {
       "value": "norwayeast"
     },
-    "avdHostPoolType": {
-      "value": "pooled"
-    },
-    "avdLoadBalancingAlgorithm": {
-      "value": "BreadthFirst"
-    },
-    "avdAssignmentType": {
-      "value": "Automatic"
-    },
-    "avdHostPoolName": {
-      "value": "alzavdaccelerator"
-    },
-    "avdPreferredAppGroupType": {
-      "value": "Desktop"
-    },
-    "avdSessionLimit": {
-      "value": 1
-    },
     "avdServiceObjectsRg": {
       "value": "rg-avd-use2-app1-service-objects"
     },

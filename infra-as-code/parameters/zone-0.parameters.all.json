@@ -1,14 +1,69 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-      // Required parameters
-      "name": {
-        "value": "<<namePrefix>>rrgmin001"
-      },
-      // Non-required parameters
-      "enableDefaultTelemetry": {
-        "value": "<enableDefaultTelemetry>"
-      }
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "createAvdVnet": {
+      "value": true
+    },
+    "avdSubscriptionID": {
+      "value": "a7693725-2adf-4eff-98eb-fc941246426d"
+    },
+    "avdHostPoolMetadataLocation": {
+      "value": "westeurope"
+    },
+    "avdSessionHostLocation": {
+      "value": "norwayeast"
+    },
+    "avdHostPoolType": {
+      "value": "pooled"
+    },
+    "avdLoadBalancingAlgorithm": {
+      "value": "BreadthFirst"
+    },
+    "avdAssignmentType": {
+      "value": "Automatic"
+    },
+    "avdHostPoolName": {
+      "value": "alzavdaccelerator"
+    },
+    "avdPreferredAppGroupType": {
+      "value": "Desktop"
+    },
+    "avdSessionLimit": {
+      "value": 1
+    },
+    "avdServiceObjectsRg": {
+      "value": "rg-avd-use2-app1-service-objects"
+    },
+    "avdNetworkObjectsRg": {
+      "value": "rg-avd-use2-app1-network"
+    },
+    "avdComputeObjectsRg": {
+      "value": "rg-avd-use2-app1-pool-compute"
+    },
+    "avdStorageObjectsRg": {
+      "value": "rg-avd-use2-app1-storage"
+    },
+    "avdMonitoringRg": {
+      "value": "rg-avd-use2-app1-monitoring"
+    },
+    "avdVnetworkAddressPrefixes": {
+      "value": "10.10.0.0/23"
+    },
+    "vNetworkAvdSubnetAddressPrefix": {
+      "value": "10.10.0.0/24"
+    },
+    "avdVnetworkName": {
+      "value": "vnet-avd-use2-app1-001"
+    },
+    "avdVnetworkSubnetName": {
+      "value": "snet-avd-use2-app1-001"
+    },
+    "avdNetworksecurityGroup": {
+      "value": "nsg-avd-use2-app1-001"
+    },
+    "avdRouteTable": {
+      "value": "route-avd-use2-app1-001"
     }
   }
+}

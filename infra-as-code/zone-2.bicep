@@ -132,7 +132,7 @@ module addAvdHostsToHostPool './registerSessionHostsOnHopstPool.bicep' = [for i 
   name: 'HP-Join-${padLeft((i + sessionHostCountIndex), 3, '0')}-to-HP-${time}'
   params: {
       location: sessionHostLocation
-      hostPoolToken: hostPoolToken
+      hostPoolToken: avdHostPoolToken
       name: '${sessionHostNamePrefix}-${padLeft((i + sessionHostCountIndex), 3, '0')}'
       hostPoolName: avdHostPoolName
       avdAgentPackageLocation: avdAgentPackageLocation
@@ -174,13 +174,11 @@ module sessionhost '../carml/0.10.0/modules/Microsoft.DesktopVirtualization/host
     lock: 'CanNotDelete'
     maxSessionLimit: avdSessionLimit
     personalDesktopAssignmentType: avdHostPoolType == 'Personal' ? '': avdAssignmentType
-    hostPoolToken: getHostPool.properties.registrationInfo.token
     vmTemplate: {
-      customImageId: '<customImageId>'
-      domain: 'domainname.onmicrosoft.com'
-      galleryImageOffer: 'office-365'
-      galleryImagePublisher: 'microsoftwindowsdesktop'
-      galleryImageSKU: '20h1-evd-o365pp'
+      domain: 'MngEnvMCAP398668.onmicrosoft.com'
+      galleryImageOffer: 'Windows-11'
+      galleryImagePublisher: 'MicrosoftWindowsDesktop'
+      galleryImageSKU: 'win11-21h2-avd'
       imageType: 'Gallery'
       imageUri: '<imageUri>'
       namePrefix: 'avdv2'
@@ -194,3 +192,5 @@ module sessionhost '../carml/0.10.0/modules/Microsoft.DesktopVirtualization/host
     }
   }
 }
+
+output avdHostPoolToken 

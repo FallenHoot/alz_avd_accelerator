@@ -48,5 +48,22 @@ module hostpools '../carml/0.10.0/modules/Microsoft.DesktopVirtualization/hostpo
     lock: 'CanNotDelete'
     maxSessionLimit: avdSessionLimit
     personalDesktopAssignmentType: avdHostPoolType == 'Personal' ? '': avdAssignmentType
+    vmTemplate: {
+      customImageId: 'win11_22h2'
+      domain: 'MngEnvMCAP398668.onmicrosoft.com'
+      galleryImageOffer: 'office-365'
+      galleryImagePublisher: 'microsoftwindowsdesktop'
+      galleryImageSKU: '20h1-evd-o365pp'
+      imageType: 'Gallery'
+      namePrefix: 'avdv2'
+      osDiskType: 'StandardSSD_LRS'
+      useManagedDisks: true
+      vmSize: {
+        cores: 2
+        id: 'Standard_D2s_v3'
+        ram: 8
+      }
+    }
   }
 }
+output avdHostPoolToken string = hostpools.outputs.avdHostPoolToken
